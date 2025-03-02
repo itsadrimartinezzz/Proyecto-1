@@ -21,24 +21,30 @@ public class VerificarLista {
 
             if (token.equals("(")) {
                 pilaExpresiones.push(token);
-                pilaOperandos.push(0); // Contador de operandos para esta subexpresión
+                pilaOperandos.push(0);
             } else if (token.equals(")")) {
-                if (pilaExpresiones.isEmpty()) return false; // Cierre sin apertura
+                if (pilaExpresiones.isEmpty()) return false;
                 pilaExpresiones.pop();
-
                 int operandos = pilaOperandos.pop();
-                if (operandos < 2) return false; // Un operador debe tener al menos 2 operandos
-            } else if (esOperador(token)) {
-                if (i + 1 >= tokens.size() || tokens.get(i + 1).equals(")")) {
-                    return false; // Un operador sin operandos no es válido
-                }
-            } else if (esVariable(token) || esNumero(token)) {
+                if (operandos < 1) return false; // Cada expresión debe tener al menos un argumento
+            } else if (esOperador(token) || esPalabraReservada(token)) {
+                if (i + 1 >= tokens.size() || tokens.get(i + 1).equals(")")) return false;
+            } else if (token.equals("'")) {
+                // QUOTE debe tener un valor después de él
+                if (i + 1 >= tokens.size() || tokens.get(i + 1).equals(")")) return false;
+            } else if (token.equals("DEFUN")) {
+                if (i + 3 >= tokens.size() || !tokens.get(i + 1).matches("[A-Za-z]+") || !tokens.get(i + 2).equals("(")) return false;
+            } else if (token.equals("SETQ")) {
+                if (i + 2 >= tokens.size() || !esVariable(tokens.get(i + 1)) || tokens.get(i + 2).equals(")")) return false;
+            } else if (token.equals("COND")) {
+                if (i + 1 >= tokens.size() || tokens.get(i + 1).equals(")")) return false;
+            } else {
                 if (pilaOperandos.isEmpty()) return false;
-                pilaOperandos.push(pilaOperandos.pop() + 1); // Aumentar el contador de operandos
+                pilaOperandos.push(pilaOperandos.pop() + 1);
             }
             i++;
         }
-        return pilaExpresiones.isEmpty(); // Paréntesis balanceados y estructura correcta
+        return pilaExpresiones.isEmpty();
     }
 
     private static List<String> convertirALista(String expresion) {
@@ -62,5 +68,9 @@ public class VerificarLista {
 
     private static boolean esNumero(String str) {
         return str.matches("\\d+");
+    }
+
+    private static boolean esPalabraReservada(String str) {
+        return str.matches("DEFUN|SETQ|COND|ATOM|LIST|EQUAL|<|>|T");
     }
 }
