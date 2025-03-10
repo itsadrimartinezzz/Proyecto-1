@@ -21,13 +21,15 @@ public class Menu {
 
         } while (!expresionValida);
 
-        // Si la expresión es válida, procedemos con la tokenización
-        List<String> tokens = Token.obtenerTokens(expresion);
-        System.out.println("\nLa expresión es válida.");
-        System.out.println("\nTokens obtenidos:");
-        for (String token : tokens) {
-            System.out.println(token);
-        }
+        // Tokenizar y guardar en lista accesible
+        Token.tokenizar(expresion);
+        List<String> tokens = Token.obtenerTokens();
+
+        // Parsear y obtener estructura
+        Object estructura = ParserLisp.parse(tokens);
+
+        System.out.println("\nEstructura generada:");
+        System.out.println(estructura);
 
         scanner.close();
     }
