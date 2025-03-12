@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Stack;
 
 public class ParserLisp {
-
     public static Object parse(List<String> tokens) {
         if (tokens.isEmpty()) {
             throw new IllegalArgumentException("Expresión vacía");
@@ -34,6 +33,8 @@ public class ParserLisp {
             throw new IllegalArgumentException("Paréntesis desbalanceados");
         }
 
-        return pila.pop();
+        // Aquí corregimos la estructura devuelta para evitar la lista extra
+        List<Object> resultado = pila.pop();
+        return resultado.size() == 1 ? resultado.get(0) : resultado;
     }
 }
