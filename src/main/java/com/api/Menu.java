@@ -31,6 +31,14 @@ public class Menu {
         System.out.println("\nEstructura generada:");
         System.out.println(estructura);
 
+        try {
+            Token.tokenizar(expresion);
+            Object resultado = ParserLisp.evaluarExpresion((List<Object>) estructura);
+            System.out.println("Resultado: " + resultado);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
         scanner.close();
     }
 }
