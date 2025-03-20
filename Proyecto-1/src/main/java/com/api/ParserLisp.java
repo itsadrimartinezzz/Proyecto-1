@@ -38,7 +38,7 @@ public class ParserLisp {
         return resultado.size() == 1 ? resultado.get(0) : resultado;
     }
 
-   /**
+    /**
      * Evalúa una operación matemática (+, -, *, /) con operandos que pueden ser valores
      * o expresiones anidadas.
      *
@@ -46,8 +46,7 @@ public class ParserLisp {
      * @param argumentos Lista de operandos o expresiones anidadas.
      * @return El resultado de la operación.
      */
-
-public static Object evaluarExpresion(List<Object> expresion) {
+    public static Object evaluarExpresion(List<Object> expresion) {
         if (expresion.isEmpty()) return expresion;
 
         Object operador = expresion.get(0);
@@ -69,7 +68,8 @@ public static Object evaluarExpresion(List<Object> expresion) {
                 return expresion;
         }
     }
- /**
+
+    /**
      * Evalúa una expresión en formato Lisp.
      * Si la expresión es una lista, evalúa el operador y los operandos.
      * Si no, devuelve la expresión tal cual.
@@ -102,16 +102,31 @@ public static Object evaluarExpresion(List<Object> expresion) {
         return resultado;
     }
 
-    public static int restar(List<Object> operandos) {
+    public static Object restar(List<Object> operandos) {
         if (operandos.isEmpty()) throw new IllegalArgumentException("Faltan operandos en resta");
         
-        int resultado = (Integer) operandos.get(0);
+        double resultado;
+        if (operandos.get(0) instanceof Integer) {
+            resultado = (Integer) operandos.get(0);
+        } else if (operandos.get(0) instanceof Double) {
+            resultado = (Double) operandos.get(0);
+        } else {
+            throw new IllegalArgumentException("Operando no válido en resta: " + operandos.get(0));
+        }
+
         for (int i = 1; i < operandos.size(); i++) {
             if (operandos.get(i) instanceof Integer) {
                 resultado -= (Integer) operandos.get(i);
+            } else if (operandos.get(i) instanceof Double) {
+                resultado -= (Double) operandos.get(i);
             } else {
-                throw new IllegalArgumentException("Operando no válido en resta");
+                throw new IllegalArgumentException("Operando no válido en resta: " + operandos.get(i));
             }
+        }
+
+        // Si todos los operandos son enteros, devuelve un entero
+        if (operandos.stream().allMatch(op -> op instanceof Integer)) {
+            return (int) resultado;
         }
         return resultado;
     }
@@ -127,7 +142,8 @@ public static Object evaluarExpresion(List<Object> expresion) {
         }
         return resultado;
     }
-     /**
+
+    /**
      * Evalúa una división asegurándose de manejar el caso de división por cero.
      *
      * @param argumentos Lista de operandos.
