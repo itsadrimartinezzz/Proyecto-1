@@ -32,7 +32,6 @@ public class Menu {
         System.out.println(estructura);
 
         try {
-            Token.tokenizar(expresion);
             Object resultado = ParserLisp.evaluarExpresion((List<Object>) estructura);
             System.out.println("Resultado: " + resultado);
         } catch (Exception e) {

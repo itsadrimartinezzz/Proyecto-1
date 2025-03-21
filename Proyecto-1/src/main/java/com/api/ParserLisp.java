@@ -8,27 +8,12 @@ import java.util.Stack;
 
 public class ParserLisp {
 
-    /**
-     * Entorno global de variables (para SETQ).
-     */
     private static final Map<String, Object> variables = new HashMap<>();
-
-    /**
-     * Entorno global de funciones definidas por el usuario (para DEFUN).
-     * Se almacenará como:
-     *    clave: nombre de la función
-     *    valor: un objeto FuncDef que tiene la lista de parámetros y el cuerpo
-     */
     private static final Map<String, FuncDef> funcionesDefinidas = new HashMap<>();
 
-    /**
-     * Clase interna para representar la definición de una función:
-     *  - parámetros
-     *  - cuerpo (la lista que representa la forma Lisp)
-     */
     private static class FuncDef {
-        List<String> parametros; // nombres de parámetros
-        Object cuerpo;           // cuerpo como una expresión Lisp (List<Object> anidada)
+        List<String> parametros;
+        Object cuerpo;
 
         FuncDef(List<String> parametros, Object cuerpo) {
             this.parametros = parametros;
@@ -36,9 +21,6 @@ public class ParserLisp {
         }
     }
 
-    /**
-     * Convierte una lista de tokens (strings) en una estructura interna (listas anidadas).
-     */
     public static Object parse(List<String> tokens) {
         if (tokens.isEmpty()) {
             throw new IllegalArgumentException("Expresión vacía");
@@ -49,21 +31,16 @@ public class ParserLisp {
 
         for (String token : tokens) {
             if (token.equals("(")) {
-                // Inicia una nueva sublista
-                List<Object> nuevaLista = new ArrayList<>();
-                pila.peek().add(nuevaLista);
-                pila.push(nuevaLista);
+                pila.push(new ArrayList<>());
             } else if (token.equals(")")) {
-                // Termina una sublista
                 if (pila.size() > 1) {
-                    pila.pop();
+                    List<Object> completa = pila.pop();
+                    pila.peek().add(completa);
                 } else {
                     throw new IllegalArgumentException("Paréntesis desbalanceados");
                 }
             } else {
-                // Si el token es numérico (\d+), parse a Integer; si no, queda como String
-                Object elemento = token.matches("\\d+") ? Integer.parseInt(token) : token;
-                pila.peek().add(elemento);
+                pila.peek().add(token.matches("\\d+") ? Integer.parseInt(token) : token);
             }
         }
 
@@ -71,39 +48,26 @@ public class ParserLisp {
             throw new IllegalArgumentException("Paréntesis desbalanceados");
         }
 
-        // Quitamos la lista principal
-        List<Object> resultado = pila.pop();
-        // Si la lista resultante tiene 1 elemento, devolver ese elemento en vez de la lista
-        return (resultado.size() == 1) ? resultado.get(0) : resultado;
+        return pila.pop().get(0);
     }
 
-    /**
-     * Evalúa una expresión Lisp representada como List<Object>.
-     * Por convención, el primer elemento suele ser un operador o símbolo.
-     */
+    /*
     public static Object evaluarExpresion(List<Object> expresion) {
         if (expresion.isEmpty()) {
             return expresion;
         }
 
-        // Tomamos el primer elemento como "operador"
         Object operador = expresion.get(0);
         if (!(operador instanceof String)) {
-            // Si no es string, puede ser una lista anidada o un número
-            // Lo tratamos como "evaluar la lista" directamente
             return evaluar(expresion);
         }
 
         String op = (String) operador;
-        // El resto son operandos
-        List<Object> operandos = expresion.subList(1, expresion.size());
 
-        // Evaluamos los operandos en la mayoría de los casos
+        List<Object> operandos = expresion.subList(1, expresion.size());
         operandos.replaceAll(ParserLisp::evaluar);
 
-        // Dependiendo de 'op', hacemos distintas cosas
         switch (op) {
-            // ---------------- Operaciones aritméticas ----------------
             case "+":
                 return sumar(operandos);
             case "-":
@@ -112,398 +76,293 @@ public class ParserLisp {
                 return multiplicar(operandos);
             case "/":
                 return dividir(operandos);
-
-            // ---------------- Comparadores ----------------
-            case "<":
-                return menorQue(operandos);
-            case ">":
-                return mayorQue(operandos);
-
-            // NUEVO: <= (si quieres comparaciones <=)
-            case "<=":
-                return menorOIgual(operandos);
-
-            // NUEVO: = (comparación numérica)
-            case "=":
-                return igualNumerico(operandos);
-
-            // Uso de EQUAL para comparar objetos en general
-            case "EQUAL":
-                return equal(operandos);
-
-            // ---------------- Formas especiales / macros ----------------
             case "DEFUN":
                 return defun(operandos);
             case "SETQ":
                 return setq(operandos);
             case "COND":
                 return cond(operandos);
-
-            // NUEVO: IF
-            case "IF":
-                return ifEspecial(operandos);
-
             case "ATOM":
                 return atom(operandos);
             case "LIST":
                 return list(operandos);
-
-            // T se asume verdadero
+            case "EQUAL":
+                return equal(operandos);
+            case "<":
+                return menorQue(operandos);
+            case ">":
+                return mayorQue(operandos);
             case "T":
                 return "T";
-
-            // ---------------- Llamada a función definida por usuario ----------------
+            case "FACTORIAL":
+                return factorial(operandos);
             default:
-                // Si 'op' está en el mapa de funcionesDefinidas, la invocamos
                 if (funcionesDefinidas.containsKey(op)) {
                     return invocarFuncionUsuario(op, operandos);
                 }
-                // En caso contrario, devolvemos la expresión tal cual (no se reconoce)
                 return expresion;
         }
     }
+    * */
+    public static Object evaluarExpresion(List<Object> expresion) {
+        if (expresion.isEmpty()) {
+            throw new IllegalArgumentException("Expresión vacía.");
+        }
 
-    /**
-     * Evalúa un objeto que puede ser List, String (símbolo) o Integer.
-     */
+        Object operador = expresion.get(0);
+        if (!(operador instanceof String)) {
+            return evaluar(expresion); // Evaluar valores directamente
+        }
+
+        String op = (String) operador;
+
+        // Evaluar todos los operandos
+        List<Object> operandos = expresion.subList(1, expresion.size());
+        operandos.replaceAll(ParserLisp::evaluar);
+
+        // Manejar operadores y funciones
+        switch (op) {
+            case "+":
+                return sumar(operandos);
+            case "-":
+                return restar(operandos);
+            case "*":
+                return multiplicar(operandos);
+            case "/":
+                return dividir(operandos);
+            case "DEFUN":
+                return defun(operandos);
+            case "SETQ":
+                return setq(operandos);
+            case "COND":
+                return cond(operandos);
+            case "ATOM":
+                return atom(operandos);
+            case "LIST":
+                return list(operandos);
+            case "EQUAL":
+                return equal(operandos);
+            case "<":
+                return menorQue(operandos);
+            case ">":
+                return mayorQue(operandos);
+            case "T":
+                return "T";
+            case "FACTORIAL":
+                return calcularFactorial(operandos);
+            default:
+                // Si es una función definida por el usuario
+                if (funcionesDefinidas.containsKey(op)) {
+                    return invocarFuncionUsuario(op, operandos);
+                }
+                throw new IllegalArgumentException("Operador o función no reconocida: " + op);
+        }
+    }
+
     public static Object evaluar(Object expresion) {
         if (expresion instanceof List) {
             return evaluarExpresion((List<Object>) expresion);
         }
-        // Si es un string, puede ser una variable
-        if (expresion instanceof String) {
-            String simbolo = (String) expresion;
-            if (variables.containsKey(simbolo)) {
-                return variables.get(simbolo);
-            }
+        if (expresion instanceof String && variables.containsKey(expresion)) {
+            return variables.get(expresion);
         }
-        // Si no es lista ni variable, devuélvelo tal cual
         return expresion;
     }
 
-    // -------------- Implementaciones de operadores y formas especiales --------------
-
-    // ---------- Comparador "=" (nuevo) ----------
-    private static Object igualNumerico(List<Object> operandos) {
-        // ( = x y )
-        if (operandos.size() != 2) {
-            throw new IllegalArgumentException("= requiere 2 operandos");
-        }
-        Object x = operandos.get(0);
-        Object y = operandos.get(1);
-
-        if (!(x instanceof Number) || !(y instanceof Number)) {
-            throw new IllegalArgumentException("Los operandos de = deben ser números");
-        }
-
-        double dx = ((Number) x).doubleValue();
-        double dy = ((Number) y).doubleValue();
-        return (dx == dy) ? "T" : "NIL";
-    }
-
-    // ---------- Comparador "<=" (nuevo) ----------
-    private static Object menorOIgual(List<Object> operandos) {
-        if (operandos.size() < 2) {
-            throw new IllegalArgumentException("<= requiere 2 operandos");
-        }
-        Object x = operandos.get(0);
-        Object y = operandos.get(1);
-        if (!(x instanceof Number) || !(y instanceof Number)) {
-            throw new IllegalArgumentException("Los operandos de <= deben ser números");
-        }
-        double dx = ((Number) x).doubleValue();
-        double dy = ((Number) y).doubleValue();
-        return (dx <= dy) ? "T" : "NIL";
-    }
-
-    // ---------- Forma especial IF (nuevo) ----------
-    private static Object ifEspecial(List<Object> operandos) {
-        // (IF condicion then [else])
-        if (operandos.size() < 2) {
-            throw new IllegalArgumentException("IF requiere al menos 2 operandos (cond y then)");
-        }
-        Object cond = operandos.get(0);
-        Object thenBranch = operandos.get(1);
-        Object elseBranch = (operandos.size() > 2) ? operandos.get(2) : null;
-
-        // si la condicion es verdadera
-        if (esVerdadero(cond)) {
-            return evaluar(thenBranch);
-        } else {
-            // si hay else, lo evaluamos
-            return (elseBranch != null) ? evaluar(elseBranch) : null;
-        }
-    }
-
-    // ---------- Forma especial DEFUN ----------
     private static Object defun(List<Object> operandos) {
-        // (DEFUN nombre (param1 param2 ...) (cuerpo...))
         if (operandos.size() < 3) {
-            throw new IllegalArgumentException("Uso de DEFUN inválido. Ej: (DEFUN nombre (params) (cuerpo))");
+            throw new IllegalArgumentException("Uso de DEFUN inválido. Forma: (DEFUN nombre (params) (cuerpo))");
         }
-        Object nombreObj = operandos.get(0);
-        Object paramsObj = operandos.get(1);
-        Object cuerpo = operandos.get(2);
 
-        if (!(nombreObj instanceof String)) {
-            throw new IllegalArgumentException("El nombre de la función debe ser un símbolo (String).");
-        }
-        String nombreFuncion = (String) nombreObj;
-
-        if (!(paramsObj instanceof List)) {
-            throw new IllegalArgumentException("La lista de parámetros debe ser una lista.");
-        }
-        List<Object> listaParametros = (List<Object>) paramsObj;
+        String nombreFuncion = (String) operandos.get(0);
         List<String> parametros = new ArrayList<>();
-        for (Object p : listaParametros) {
-            if (!(p instanceof String)) {
-                throw new IllegalArgumentException("Los parámetros deben ser símbolos (String). Encontrado: " + p);
-            }
+        for (Object p : (List<Object>) operandos.get(1)) {
             parametros.add((String) p);
         }
+        Object cuerpo = operandos.get(2);
 
-        // Creamos la definición de función y la guardamos en el mapa
-        FuncDef def = new FuncDef(parametros, cuerpo);
-        funcionesDefinidas.put(nombreFuncion, def);
-
-        // Devolvemos el nombre de la función como confirmación
+        funcionesDefinidas.put(nombreFuncion, new FuncDef(parametros, cuerpo));
         return nombreFuncion;
     }
 
-    // ---------- Forma especial SETQ ----------
     private static Object setq(List<Object> operandos) {
-        // (SETQ var valor)
         if (operandos.size() < 2) {
-            throw new IllegalArgumentException("Uso de SETQ inválido. Ej: (SETQ var valor)");
+            throw new IllegalArgumentException("Uso de SETQ inválido. Forma: (SETQ var valor)");
         }
-        Object varObj = operandos.get(0);
-        Object valorObj = operandos.get(1);
 
-        if (!(varObj instanceof String)) {
-            throw new IllegalArgumentException("El nombre de la variable debe ser un símbolo (String).");
-        }
-        String nombreVar = (String) varObj;
+        String nombreVar = (String) operandos.get(0);
+        Object valor = evaluar(operandos.get(1));
 
-        // Asigna en el mapa de variables global
-        variables.put(nombreVar, valorObj);
-        return valorObj;
+        variables.put(nombreVar, valor);
+        return valor;
     }
 
-    // ---------- Forma especial COND ----------
     private static Object cond(List<Object> operandos) {
-        // (COND (cond1 expr1) (cond2 expr2) ...)
         for (Object o : operandos) {
-            if (!(o instanceof List)) {
-                continue;
-            }
             List<Object> par = (List<Object>) o;
             if (par.size() < 2) {
                 continue;
             }
+
             Object condicion = evaluar(par.get(0));
             if (esVerdadero(condicion)) {
                 return evaluar(par.get(1));
             }
         }
-        // Si ninguna condición es verdadera, retorna NIL (null)
-        return null;
+        return null; // NIL
     }
 
-    // Verifica si algo es verdadero en este mini Lisp
     private static boolean esVerdadero(Object valor) {
-        if (valor == null) return false;
-        if ("NIL".equals(valor)) return false;
-        return true;
+        return valor != null && !"NIL".equals(valor);
+    }
+    // Función para calcular factorial
+    private static Object calcularFactorial(List<Object> operandos) {
+        if (operandos.size() != 1) {
+            throw new IllegalArgumentException("Uso incorrecto de factorial. Ejemplo: (FACTORIAL 5)");
+        }
+        int n = (int) operandos.get(0);
+        if (n == 0) return 1;
+        return n * (int) calcularFactorial(List.of(n - 1));
     }
 
-    // ---------- Forma especial ATOM ----------
-    private static Object atom(List<Object> operandos) {
-        // (ATOM x)
-        if (operandos.isEmpty()) {
-            throw new IllegalArgumentException("ATOM requiere un operando");
-        }
-        Object arg = operandos.get(0);
-        // Devuelve "T" si no es lista, "NIL" si es lista
-        return (arg instanceof List) ? "NIL" : "T";
-    }
-
-    // ---------- Forma especial LIST ----------
-    private static Object list(List<Object> operandos) {
-        // (LIST x1 x2 x3 ...)
-        return new ArrayList<>(operandos);
-    }
-
-    // ---------- Forma especial EQUAL ----------
-    private static Object equal(List<Object> operandos) {
-        // (EQUAL x y)
-        if (operandos.size() < 2) {
-            throw new IllegalArgumentException("EQUAL requiere dos operandos");
-        }
-        Object x = operandos.get(0);
-        Object y = operandos.get(1);
-
-        if (x == null && y == null) {
-            return "T";
-        }
-        if (x != null && x.equals(y)) {
-            return "T";
-        }
-        return "NIL";
-    }
-
-    // ---------- Comparador < ----------
-    private static Object menorQue(List<Object> operandos) {
-        // (< x y)
-        if (operandos.size() < 2) {
-            throw new IllegalArgumentException("< requiere dos operandos");
-        }
-        Object x = operandos.get(0);
-        Object y = operandos.get(1);
-        if (!(x instanceof Number) || !(y instanceof Number)) {
-            throw new IllegalArgumentException("Los operandos de < deben ser números");
-        }
-        double dx = ((Number) x).doubleValue();
-        double dy = ((Number) y).doubleValue();
-        return (dx < dy) ? "T" : "NIL";
-    }
-
-    // ---------- Comparador > ----------
-    private static Object mayorQue(List<Object> operandos) {
-        // (> x y)
-        if (operandos.size() < 2) {
-            throw new IllegalArgumentException("> requiere dos operandos");
-        }
-        Object x = operandos.get(0);
-        Object y = operandos.get(1);
-        if (!(x instanceof Number) || !(y instanceof Number)) {
-            throw new IllegalArgumentException("Los operandos de > deben ser números");
-        }
-        double dx = ((Number) x).doubleValue();
-        double dy = ((Number) y).doubleValue();
-        return (dx > dy) ? "T" : "NIL";
-    }
-
-    /**
-     * Invoca una función definida por el usuario, p.ej. (mi-funcion arg1 arg2).
-     */
+    // Invocar funciones definidas por el usuario
     private static Object invocarFuncionUsuario(String nombreFuncion, List<Object> args) {
         FuncDef def = funcionesDefinidas.get(nombreFuncion);
         if (def == null) {
             throw new IllegalArgumentException("Función no definida: " + nombreFuncion);
         }
-        // Comprobamos aridad
+
         if (args.size() != def.parametros.size()) {
-            throw new IllegalArgumentException(
-                    "Número de argumentos no coincide con la definición de la función " + nombreFuncion
-            );
+            throw new IllegalArgumentException("Número de argumentos incorrecto para " + nombreFuncion);
         }
 
-        // Resguardamos variables actuales
         Map<String, Object> backup = new HashMap<>(variables);
 
         try {
-            // Asignamos cada parámetro en el entorno global (simplificado)
+            // Asignar parámetros a sus valores
             for (int i = 0; i < args.size(); i++) {
-                String paramName = def.parametros.get(i);
-                variables.put(paramName, args.get(i));
+                variables.put(def.parametros.get(i), args.get(i));
             }
-            // Evaluamos el cuerpo en este entorno
+            // Evaluar el cuerpo de la función
             return evaluar(def.cuerpo);
         } finally {
-            // Restauramos las variables originales
+            // Restaurar variables globales
             variables.clear();
             variables.putAll(backup);
         }
     }
+    /*
+    private static Object invocarFuncionUsuario(String nombreFuncion, List<Object> args) {
+        FuncDef def = funcionesDefinidas.get(nombreFuncion);
+        if (def == null) {
+            throw new IllegalArgumentException("Función no definida: " + nombreFuncion);
+        }
 
-    // ------------------ Operaciones aritméticas ------------------
+        if (args.size() != def.parametros.size()) {
+            throw new IllegalArgumentException("Número de argumentos incorrecto para " + nombreFuncion);
+        }
 
-    public static Object sumar(List<Object> operandos) {
+        Map<String, Object> backup = new HashMap<>(variables);
+
+        try {
+            for (int i = 0; i < args.size(); i++) {
+                variables.put(def.parametros.get(i), evaluar(args.get(i)));
+            }
+
+            return evaluar(def.cuerpo);
+        } finally {
+            variables.clear();
+            variables.putAll(backup);
+        }
+    }
+    * */
+
+    // Operaciones aritméticas básicas
+    private static Object sumar(List<Object> operandos) {
         double resultado = 0;
         for (Object op : operandos) {
-            if (op instanceof Integer) {
-                resultado += (Integer) op;
-            } else if (op instanceof Double) {
-                resultado += (Double) op;
-            } else {
-                throw new IllegalArgumentException("Operando no válido en suma: " + op);
-            }
-        }
-        // Si todos son enteros, retornamos int
-        if (operandos.stream().allMatch(op -> op instanceof Integer)) {
-            return (int) resultado;
+            resultado += ((Number) evaluar(op)).doubleValue();
         }
         return resultado;
     }
 
-    public static Object restar(List<Object> operandos) {
-        if (operandos.isEmpty()) {
-            throw new IllegalArgumentException("Faltan operandos en resta");
-        }
-        double resultado;
-        Object primero = operandos.get(0);
-        if (primero instanceof Integer) {
-            resultado = (Integer) primero;
-        } else if (primero instanceof Double) {
-            resultado = (Double) primero;
-        } else {
-            throw new IllegalArgumentException("Operando no válido en resta: " + primero);
-        }
-
+    private static Object restar(List<Object> operandos) {
+        double resultado = ((Number) evaluar(operandos.get(0))).doubleValue();
         for (int i = 1; i < operandos.size(); i++) {
-            Object op = operandos.get(i);
-            if (op instanceof Integer) {
-                resultado -= (Integer) op;
-            } else if (op instanceof Double) {
-                resultado -= (Double) op;
-            } else {
-                throw new IllegalArgumentException("Operando no válido en resta: " + op);
-            }
-        }
-
-        // Si todos eran enteros, devolvemos int
-        if (operandos.stream().allMatch(op -> op instanceof Integer)) {
-            return (int) resultado;
+            resultado -= ((Number) evaluar(operandos.get(i))).doubleValue();
         }
         return resultado;
     }
 
-    public static int multiplicar(List<Object> operandos) {
-        int resultado = 1;
+    private static Object multiplicar(List<Object> operandos) {
+        double resultado = 1;
         for (Object op : operandos) {
-            if (op instanceof Integer) {
-                resultado *= (Integer) op;
-            } else {
-                throw new IllegalArgumentException("Operando no válido en multiplicación");
-            }
+            resultado *= ((Number) evaluar(op)).doubleValue();
         }
         return resultado;
     }
 
-    public static Object dividir(List<Object> operandos) {
-        if (operandos.isEmpty()) {
-            throw new IllegalArgumentException("Faltan operandos en división");
-        }
-        Object primero = operandos.get(0);
-        if (!(primero instanceof Integer)) {
-            throw new IllegalArgumentException("División solo soporta enteros (en este mini-Lisp)");
-        }
-        int resultado = (Integer) primero;
-
+    private static Object dividir(List<Object> operandos) {
+        double resultado = ((Number) evaluar(operandos.get(0))).doubleValue();
         for (int i = 1; i < operandos.size(); i++) {
-            Object op = operandos.get(i);
-            if (!(op instanceof Integer)) {
-                throw new IllegalArgumentException("División solo soporta enteros");
-            }
-            int divisor = (Integer) op;
-            if (divisor == 0) {
-                // Manejo de /0
-                return (resultado == 0)
-                        ? "0/0 indefinido"
-                        : "x/0 no se puede dividir entre 0";
-            }
-            resultado /= divisor;
+            resultado /= ((Number) evaluar(operandos.get(i))).doubleValue();
         }
         return resultado;
+    }
+
+    // Funciones adicionales
+    private static Object atom(List<Object> operandos) {
+        if (operandos.isEmpty()) {
+            throw new IllegalArgumentException("ATOM requiere un operando");
+        }
+        Object arg = evaluar(operandos.get(0));
+        return (arg instanceof List) ? "NIL" : "T";
+    }
+
+    private static Object list(List<Object> operandos) {
+        return new ArrayList<>(operandos);
+    }
+
+    private static Object equal(List<Object> operandos) {
+        if (operandos.size() < 2) {
+            throw new IllegalArgumentException("EQUAL requiere dos operandos");
+        }
+        Object x = evaluar(operandos.get(0));
+        Object y = evaluar(operandos.get(1));
+        return (x.equals(y)) ? "T" : "NIL";
+    }
+
+    private static Object menorQue(List<Object> operandos) {
+        if (operandos.size() < 2) {
+            throw new IllegalArgumentException("< requiere dos operandos");
+        }
+        double x = ((Number) evaluar(operandos.get(0))).doubleValue();
+        double y = ((Number) evaluar(operandos.get(1))).doubleValue();
+        return (x < y) ? "T" : "NIL";
+    }
+
+    private static Object mayorQue(List<Object> operandos) {
+        if (operandos.size() < 2) {
+            throw new IllegalArgumentException("> requiere dos operandos");
+        }
+        double x = ((Number) evaluar(operandos.get(0))).doubleValue();
+        double y = ((Number) evaluar(operandos.get(1))).doubleValue();
+        return (x > y) ? "T" : "NIL";
+    }
+
+    // Función factorial
+    private static Object factorial(List<Object> operandos) {
+        if (operandos.size() != 1) {
+            throw new IllegalArgumentException("FACTORIAL requiere exactamente un operando");
+        }
+        int n = ((Number) evaluar(operandos.get(0))).intValue();
+        return factorialRec(n);
+    }
+
+    private static int factorialRec(int n) {
+        if (n == 0) {
+            return 1;
+        }
+        return n * factorialRec(n - 1);
     }
 }
