@@ -13,9 +13,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="2ucxscv8R2FjwBmq6BqYmbuNGc0" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -26,9 +26,9 @@
     "Application.Menu.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "b1a7b9d3",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Alejandro/Documents/Universidad/Tercer Semestre/Algoritmos y Estructura de Datos/Codigos/Proyecto1-Fase2/Proyecto-1",
+    "last_opened_file_path": "D:/Alejandro/Documents/Universidad/Tercer Semestre/Algoritmos y Estructura de Datos/Codigos/HojaTrabajo5/Ht5",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -68,6 +68,7 @@
       <option name="presentableId" value="Default" />
       <updated>1742561872025</updated>
       <workItem from="1742561873303" duration="11940000" />
+      <workItem from="1742583281812" duration="28000" />
     </task>
     <servers />
   </component>
