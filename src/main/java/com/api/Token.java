@@ -10,11 +10,17 @@ public class Token {
 
     public static void tokenizar(String expresion) {
         tokens.clear();
-        Pattern pattern = Pattern.compile("[()]|[<>+\\-*/']|[A-Za-z0-9]+");
+
+        // Mejorar el patrón para reconocer correctamente los operadores de comparación como un solo token
+        Pattern pattern = Pattern.compile("<=|>=|[()]|[<>+\\-*/']|=|[A-Za-z0-9-]+|[0-9]+\\.[0-9]+");
         Matcher matcher = pattern.matcher(expresion);
 
+        System.out.println("Tokenizando: " + expresion);
+
         while (matcher.find()) {
-            tokens.add(matcher.group());
+            String token = matcher.group();
+            tokens.add(token);
+            System.out.println("Token: " + token);
         }
     }
 

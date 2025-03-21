@@ -42,7 +42,7 @@ public class VerificarLista {
                 if (i + 1 >= tokens.size() || tokens.get(i + 1).equals(")")) return false;
             } else if (token.equals("DEFUN")) {
                 // DEFUN debe tener un nombre de función y una lista de parámetros
-                if (i + 3 >= tokens.size() || !tokens.get(i + 1).matches("[A-Za-z]+") || !tokens.get(i + 2).equals("(")) return false;
+                if (i + 3 >= tokens.size() || !tokens.get(i + 1).matches("[A-Za-z][-A-Za-z0-9]*") || !tokens.get(i + 2).equals("(")) return false;
             } else if (token.equals("SETQ")) {
                 // SETQ debe tener una variable y un valor
                 if (i + 2 >= tokens.size() || !esVariable(tokens.get(i + 1)) || tokens.get(i + 2).equals(")")) return false;
@@ -66,7 +66,7 @@ public class VerificarLista {
      */
     private static List<String> convertirALista(String expresion) {
         List<String> lista = new ArrayList<>();
-        Pattern pattern = Pattern.compile("[()]|[<>+\\-*/']|[A-Za-z0-9]+");
+        Pattern pattern = Pattern.compile("[()]|[<>+\\-*/']|<=|>=|=|[A-Za-z0-9-]+|[0-9]+\\.[0-9]+");
         Matcher matcher = pattern.matcher(expresion);
 
         while (matcher.find()) {
@@ -81,7 +81,7 @@ public class VerificarLista {
      * @return true si es un operador, false en caso contrario.
      */
     private static boolean esOperador(String str) {
-        return "+-*/".contains(str);
+        return "+-*/=<><=>=".contains(str);
     }
 
     /**
@@ -90,7 +90,7 @@ public class VerificarLista {
      * @return true si es una variable válida, false en caso contrario.
      */
     private static boolean esVariable(String str) {
-        return str.matches("[A-Za-z]+");
+        return str.matches("[A-Za-z][-A-Za-z0-9]*");
     }
 
     /**
@@ -99,7 +99,7 @@ public class VerificarLista {
      * @return true si es un número, false en caso contrario.
      */
     private static boolean esNumero(String str) {
-        return str.matches("\\d+");
+        return str.matches("-?\\d+") || str.matches("-?\\d+\\.\\d+");
     }
 
     /**
@@ -108,6 +108,6 @@ public class VerificarLista {
      * @return true si es una palabra reservada, false en caso contrario.
      */
     private static boolean esPalabraReservada(String str) {
-        return str.matches("DEFUN|SETQ|COND|ATOM|LIST|EQUAL|<|>|T");
+        return str.matches("DEFUN|SETQ|COND|ATOM|LIST|EQUAL|<|>|<=|>=|=|T|NIL|IF");
     }
 }
