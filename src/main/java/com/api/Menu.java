@@ -30,6 +30,7 @@ public class Menu {
             }
 
             try {
+                expresion = expresion.replaceAll("\\s+", " ").trim();
                 // Tokeniza la expresión ingresada
                 Token.tokenizar(expresion);
                 List<String> tokens = Token.obtenerTokens();
