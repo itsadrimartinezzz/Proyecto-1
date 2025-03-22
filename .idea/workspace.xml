@@ -27,8 +27,9 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Alejandro/Documents/Universidad/Tercer Semestre/Algoritmos y Estructura de Datos/Codigos/HojaTrabajo5/Ht5",
+    "last_opened_file_path": "D:/Alejandro/Documents/Universidad/Tercer Semestre/Algoritmos y Estructura de Datos/Codigos/Proyecto1-Fase2/Proyecto-1",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -69,6 +70,7 @@
       <updated>1742561872025</updated>
       <workItem from="1742561873303" duration="11940000" />
       <workItem from="1742583281812" duration="28000" />
+      <workItem from="1742583328289" duration="463000" />
     </task>
     <servers />
   </component>

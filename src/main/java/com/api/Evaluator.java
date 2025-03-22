@@ -5,11 +5,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 
+/**
+ * Evaluator class for evaluating Lisp-like expressions.
+ */
 public class Evaluator {
 
     private static Map<String, Object> variables = new HashMap<>();
     private static final Map<String, LispFunction> functions = new HashMap<>();
 
+    /**
+     * Evaluates a given expression.
+     *
+     * @param expr The expression to evaluate.
+     * @return The result of the evaluation.
+     */
     public static Object evaluate(Object expr) {
         if (expr instanceof List) {
             List<?> exprList = (List<?>) expr;
@@ -137,6 +146,12 @@ public class Evaluator {
         return expr;
     }
 
+    /**
+     * Checks if a condition is true.
+     *
+     * @param condition The condition to check.
+     * @return True if the condition is true, false otherwise.
+     */
     private static boolean isTrue(Object condition) {
         if (condition instanceof Boolean) {
             return (Boolean) condition;
@@ -152,6 +167,13 @@ public class Evaluator {
         return condition != null;
     }
 
+    /**
+     * Evaluates an arithmetic expression.
+     *
+     * @param operator The arithmetic operator.
+     * @param exprList The list of expressions.
+     * @return The result of the arithmetic operation.
+     */
     private static Object evaluateArithmetic(String operator, List<?> exprList) {
         if (exprList.size() < 2) throw new IllegalArgumentException("Operación aritmética incompleta");
 
@@ -209,6 +231,13 @@ public class Evaluator {
         return isInteger ? (int) result : result;
     }
 
+    /**
+     * Evaluates a comparison expression.
+     *
+     * @param operator The comparison operator.
+     * @param exprList The list of expressions.
+     * @return The result of the comparison.
+     */
     private static Object evaluateComparison(String operator, List<?> exprList) {
         if (exprList.size() < 3) {
             throw new IllegalArgumentException("Comparación requiere al menos dos operandos");
@@ -260,6 +289,12 @@ public class Evaluator {
         }
     }
 
+    /**
+     * Handles the SETQ operation.
+     *
+     * @param exprList The list of expressions.
+     * @return The value assigned to the variable.
+     */
     private static Object handleSetq(List<?> exprList) {
         if (exprList.size() != 3) throw new IllegalArgumentException("SETQ requiere una variable y un valor");
         String varName = exprList.get(1).toString();
@@ -268,6 +303,12 @@ public class Evaluator {
         return value;
     }
 
+    /**
+     * Handles the DEFUN operation.
+     *
+     * @param exprList The list of expressions.
+     * @return A message indicating the function has been defined.
+     */
     private static Object handleDefun(List<?> exprList) {
         if (exprList.size() < 4) {
             throw new IllegalArgumentException("DEFUN necesita un nombre, parámetros y un cuerpo.");
@@ -300,6 +341,13 @@ public class Evaluator {
         return "Función " + functionName + " definida.";
     }
 
+    /**
+     * Handles a function call.
+     *
+     * @param functionName The name of the function.
+     * @param exprList The list of expressions.
+     * @return The result of the function call.
+     */
     private static Object handleFunctionCall(String functionName, List<?> exprList) {
         if (!functions.containsKey(functionName)) {
             throw new IllegalArgumentException("Función no definida: " + functionName);
@@ -360,6 +408,12 @@ public class Evaluator {
         }
     }
 
+    /**
+     * Handles the COND operation.
+     *
+     * @param exprList The list of expressions.
+     * @return The result of the COND operation.
+     */
     private static Object handleCond(List<?> exprList) {
         for (int i = 1; i < exprList.size(); i++) {
             Object clause = exprList.get(i);
@@ -388,6 +442,13 @@ public class Evaluator {
         return null; // Si ninguna condición se cumple
     }
 
+    /**
+     * Handles predicate operations.
+     *
+     * @param predicate The predicate to handle.
+     * @param exprList The list of expressions.
+     * @return The result of the predicate operation.
+     */
     private static Object handlePredicates(String predicate, List<?> exprList) {
         if (exprList.size() < 2) {
             throw new IllegalArgumentException("Predicado requiere al menos un argumento");
@@ -412,19 +473,38 @@ public class Evaluator {
     }
 }
 
+/**
+ * Class representing a Lisp function.
+ */
 class LispFunction {
     private final List<String> params;
     private final List<?> body;
 
+    /**
+     * Constructor for LispFunction.
+     *
+     * @param params The parameters of the function.
+     * @param body The body of the function.
+     */
     public LispFunction(List<String> params, List<?> body) {
         this.params = params;
         this.body = body;
     }
 
+    /**
+     * Gets the parameters of the function.
+     *
+     * @return The parameters of the function.
+     */
     public List<String> getParams() {
         return params;
     }
 
+    /**
+     * Gets the body of the function.
+     *
+     * @return The body of the function.
+     */
     public List<?> getBody() {
         return body;
     }
