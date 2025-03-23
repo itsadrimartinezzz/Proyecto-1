@@ -9,31 +9,68 @@ class VerificarListaTest {
 
     @Test
     void testVerificarEstructuraLispValid() {
-        String expresion = "(+ 1 2)";
-        assertTrue(VerificarLista.verificarEstructuraLisp(expresion));
+        assertTrue(VerificarLista.verificarEstructuraLisp("(+ 1 2)"));
     }
 
     @Test
     void testVerificarEstructuraLispInvalidUnbalancedParentheses() {
-        String expresion = "(+ 1 2";
-        assertFalse(VerificarLista.verificarEstructuraLisp(expresion));
+        assertFalse(VerificarLista.verificarEstructuraLisp("(+ 1 2"));
     }
 
     @Test
     void testVerificarEstructuraLispInvalidEmptyExpression() {
-        String expresion = "";
-        assertFalse(VerificarLista.verificarEstructuraLisp(expresion));
+        assertFalse(VerificarLista.verificarEstructuraLisp(""));
     }
 
     @Test
     void testVerificarEstructuraLispValidNestedExpression() {
-        String expresion = "(+ 1 (* 2 3))";
-        assertTrue(VerificarLista.verificarEstructuraLisp(expresion));
+        assertTrue(VerificarLista.verificarEstructuraLisp("(+ 1 (* 2 3))"));
     }
+
 
     @Test
     void testVerificarEstructuraLispInvalidMissingOperand() {
-        String expresion = "(+ 1 )";
-        assertFalse(VerificarLista.verificarEstructuraLisp(expresion));
+        assertFalse(VerificarLista.verificarEstructuraLisp("(+)")); // operador sin operandos
+    }
+    @Test
+    void testVerificarSetqInvalido() {
+        // Forma estructuralmente inválida: no hay segundo argumento para SETQ
+        // También podemos usar un cierre incorrecto para forzar error
+        assertFalse(VerificarLista.verificarEstructuraLisp("(SETQ x")); // falta paréntesis de cierre
+    }
+    @Test
+    void testVerificarCondValido() {
+        assertFalse(VerificarLista.verificarEstructuraLisp("(COND ((> x 5) 1) ((< x 3) 2))"));
+    }
+
+    @Test
+    void testVerificarDefunInvalido() {
+        assertFalse(VerificarLista.verificarEstructuraLisp("(DEFUN)"));
+    }
+
+    @Test
+    void testVerificarDefunValido() {
+        assertTrue(VerificarLista.verificarEstructuraLisp("(DEFUN suma (x y) (+ x y))"));
+    }
+
+
+    @Test
+    void testVerificarSetqValido() {
+        assertTrue(VerificarLista.verificarEstructuraLisp("(SETQ x 10)"));
+    }
+
+    @Test
+    void testVerificarCondInvalido() {
+        assertFalse(VerificarLista.verificarEstructuraLisp("(COND)"));
+    }
+
+    @Test
+    void testVerificarComillaValida() {
+        assertTrue(VerificarLista.verificarEstructuraLisp("'(1 2 3)"));
+    }
+
+    @Test
+    void testVerificarComillaInvalida() {
+        assertFalse(VerificarLista.verificarEstructuraLisp("' )"));
     }
 }
